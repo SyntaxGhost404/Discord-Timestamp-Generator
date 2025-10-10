@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 
-type Mode = 'natural' | 'reverse' | 'manual';
+type Mode = 'natural' | 'reverse' | 'manual' | 'timezone';
 
 interface ModeToggleProps {
     mode: Mode;
@@ -13,6 +12,7 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({ mode, onModeChange }) =>
     const modes: { id: Mode, label: string }[] = [
         { id: 'natural', label: 'Natural' },
         { id: 'manual', label: 'Manual' },
+        { id: 'timezone', label: 'Timezone' },
         { id: 'reverse', label: 'Reverse' },
     ];
 
@@ -22,7 +22,7 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({ mode, onModeChange }) =>
                 <button
                     key={m.id}
                     onClick={() => onModeChange(m.id)}
-                    className={`relative px-6 py-2 text-sm font-medium rounded-full transition-colors ${
+                    className={`relative px-5 py-2 text-sm font-medium rounded-full transition-colors ${
                         mode === m.id ? 'text-gray-100' : 'text-gray-400 hover:text-gray-200'
                     }`}
                 >

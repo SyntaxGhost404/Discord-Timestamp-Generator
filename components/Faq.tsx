@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { FaqAccordion } from './FaqAccordion';
 
-type Mode = 'natural' | 'manual' | 'reverse';
+type Mode = 'natural' | 'manual' | 'reverse' | 'timezone';
 
 interface FaqProps {
     mode: Mode;
@@ -55,6 +56,20 @@ const ReverseAnswer = () => (
     </>
 );
 
+const TimezoneAnswer = () => (
+    <>
+        <p>
+            This mode allows you to convert a specific date and time from one timezone to another, and instantly get the correct Discord timestamp for it.
+        </p>
+        <p>
+            First, use the calendar and time inputs to set your source date and time. Then, select your source timezone and the target timezone you want to convert to. The tool will automatically fetch the converted time.
+        </p>
+        <p>
+            Once the conversion is complete, all corresponding Discord timestamp formats will be generated below for you to copy. This is perfect for scheduling events with people in different parts of the world.
+        </p>
+    </>
+);
+
 
 const allFaqData = [
     {
@@ -62,13 +77,15 @@ const allFaqData = [
             natural: "How do I use the natural timestamp generator?",
             manual: "How do I use the manual timestamp generator?",
             reverse: "How do I use the reverse timestamp generator?",
+            timezone: "How do I use the timezone converter?",
         },
         answer: {
             natural: <NaturalAnswer />,
             manual: <ManualAnswer />,
             reverse: <ReverseAnswer />,
+            timezone: <TimezoneAnswer />,
         },
-        modes: ['natural', 'manual', 'reverse']
+        modes: ['natural', 'manual', 'reverse', 'timezone']
     },
     {
         question: "Why should I use Discord timestamps?",
@@ -77,7 +94,7 @@ const allFaqData = [
                 Discord Timestamps are timezone-agnostic. When you send one in chat, it automatically displays the correct time for every user, regardless of their local timezone. This eliminates confusion and makes scheduling events or referencing times in international communities effortless.
             </p>
         ),
-        modes: ['natural', 'manual', 'reverse']
+        modes: ['natural', 'manual', 'reverse', 'timezone']
     },
     {
         question: "How accurate are the relative time previews?",
@@ -91,7 +108,7 @@ const allFaqData = [
                 </p>
             </>
         ),
-        modes: ['natural', 'manual', 'reverse']
+        modes: ['natural', 'manual', 'reverse', 'timezone']
     },
     {
         question: "Why does “now” show as “1 seconds ago”?",

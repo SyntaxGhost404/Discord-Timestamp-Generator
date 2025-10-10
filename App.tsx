@@ -13,8 +13,9 @@ import { Footer } from './components/Footer';
 import { ModeToggle } from './components/ModeToggle';
 import { ReverseGenerator } from './components/ReverseGenerator';
 import { ManualGenerator } from './components/ManualGenerator';
+import { TimezoneGenerator } from './components/TimezoneGenerator';
 
-type Mode = 'natural' | 'reverse' | 'manual';
+type Mode = 'natural' | 'reverse' | 'manual' | 'timezone';
 
 const App: React.FC = () => {
     const [input, setInput] = useState('');
@@ -171,6 +172,7 @@ const App: React.FC = () => {
                 <AnimatePresence mode="wait">
                     {mode === 'natural' ? naturalGenerator
                         : mode === 'manual' ? <ManualGenerator key="manual-generator" />
+                        : mode === 'timezone' ? <TimezoneGenerator key="timezone-generator" />
                         : <ReverseGenerator key="reverse-generator" />}
                 </AnimatePresence>
                 
