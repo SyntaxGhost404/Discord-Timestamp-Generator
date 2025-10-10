@@ -22,7 +22,7 @@ export const ModeToggle: React.FC<ModeToggleProps> = ({ mode, onModeChange }) =>
                 <button
                     key={m.id}
                     onClick={() => onModeChange(m.id)}
-                    className={`relative px-5 py-2 text-sm font-medium rounded-full transition-colors ${
+                    className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors ${
                         mode === m.id ? 'text-gray-100' : 'text-gray-400 hover:text-gray-200'
                     }`}
                 >
