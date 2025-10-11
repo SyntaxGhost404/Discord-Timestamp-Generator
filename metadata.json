@@ -1,5 +1,5 @@
 {
   "name": "Discord Timestamp Generator",
-  "description": "A sophisticated, visually stunning Discord Timestamp Generator that operates in real-time. Type any natural language date or time to instantly generate Discord-compatible timestamps with convenient suggestions. Also supports manual date selection via a calendar and reversing existing timestamp codes.",
+  "description": "Discord Timestamp Generator: Create, reverse, and convert timestamps with natural language, a manual picker, and timezone support. Generates all Discord time formats instantly.",
   "requestFramePermissions": []
 }
