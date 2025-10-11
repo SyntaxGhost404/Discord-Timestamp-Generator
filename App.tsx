@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import * as chrono from 'chrono-node';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
@@ -34,13 +33,49 @@ const App: React.FC = () => {
         setCopiedIndex(null);
     }, [mode]);
 
+    const preprocessInput = (text: string): string => {
+        let processedText = text.trim();
+    
+        // 1. Shorthands (case-insensitive)
+        const lowerCaseText = processedText.toLowerCase();
+        if (lowerCaseText === 'tom') {
+            return 'tomorrow';
+        }
+        
+        // 2. Dates with dots -> dates with slashes
+        // Full date: 10.20.2025 -> 10/20/2025
+        processedText = processedText.replace(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/, '$1/$2/$3');
+        // Short date: 10.20 -> 10/20
+        processedText = processedText.replace(/^(\d{1,2})\.(\d{1,2})$/, '$1/$2');
+    
+        // 3. Lone numbers as hours
+        // Just a number: "10" -> "10:00"
+        if (/^\d{1,2}$/.test(processedText)) {
+            return `${processedText}:00`;
+        }
+    
+        // Ends with space and number: "10/20 1" -> "10/20 1:00"
+        // Avoids changing durations like "in 1 hour"
+        const match = processedText.match(/^(.*\s)(\d{1,2})$/);
+        if (match) {
+            const preceding = match[1].trim().toLowerCase();
+            const durationKeywords = ['in', 'ago', 'hour', 'hours', 'minute', 'minutes', 'day', 'days', 'week', 'weeks', 'month', 'months', 'year', 'years', 'hr', 'min', 'sec'];
+            if (!durationKeywords.some(kw => preceding.endsWith(kw))) {
+                return `${match[1]}${match[2]}:00`;
+            }
+        }
+    
+        return processedText;
+    };
+
     useEffect(() => {
         if (mode !== 'natural' || debouncedInput.trim() === '') {
             if (mode === 'natural') setSuggestions([]);
             return;
         }
 
-        const results = chrono.parse(debouncedInput);
+        const processedInput = preprocessInput(debouncedInput);
+        const results = chrono.parse(processedInput);
         if (results.length > 0) {
             const newSuggestions: TimestampSuggestion[] = [];
             const primaryResult = results[0];
@@ -161,7 +196,7 @@ const App: React.FC = () => {
                         Discord Timestamp Generator
                     </h1>
                     <p className="mt-4 text-lg text-gray-400 max-w-xl">
-                        A quick tool for creating and reversing Discord timestamps.
+                        Create, convert, and reverse Discord timestamps using natural language, a manual picker, or timezone conversion.
                     </p>
                 </header>
 
