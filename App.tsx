@@ -35,9 +35,36 @@ const App: React.FC = () => {
 
     const preprocessInput = (text: string): string => {
         let processedText = text.trim();
-    
-        // 1. Shorthands (case-insensitive)
         const lowerCaseText = processedText.toLowerCase();
+    
+        // Fix for "next [weekday]" bug to handle chrono-node's unexpected parsing
+        const dayMapping: { [key: string]: string } = {
+            sunday: 'sunday', sun: 'sunday',
+            monday: 'monday', mon: 'monday',
+            tuesday: 'tuesday', tue: 'tuesday', tues: 'tuesday',
+            wednesday: 'wednesday', wed: 'wednesday',
+            thursday: 'thursday', thu: 'thursday', thurs: 'thursday',
+            friday: 'friday', fri: 'friday',
+            saturday: 'saturday', sat: 'saturday',
+        };
+        const nextDayMatch = lowerCaseText.match(/^next\s+([a-z]+s?)(.*)$/);
+        if (nextDayMatch && dayMapping[nextDayMatch[1]]) {
+            const requestedDayFullName = dayMapping[nextDayMatch[1]];
+            const restOfString = nextDayMatch[2];
+            const today = new Date();
+            const weekDays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const todayDayName = weekDays[today.getDay()];
+            
+            if (requestedDayFullName === todayDayName) {
+                // It's Saturday, user says "next saturday at 5pm" -> "in 7 days at 5pm"
+                return `in 7 days${restOfString}`;
+            } else {
+                // It's Friday, user says "next saturday at 5pm" -> "saturday at 5pm"
+                return `${requestedDayFullName}${restOfString}`;
+            }
+        }
+
+        // 1. Shorthands (case-insensitive)
         if (lowerCaseText === 'tom') {
             return 'tomorrow';
         }
