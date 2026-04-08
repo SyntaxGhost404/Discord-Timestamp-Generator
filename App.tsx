@@ -773,8 +773,9 @@ const App: React.FC = () => {
                     <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight font-pixel">
                         Word Counter<span className="hidden sm:inline"> Tool</span>
                     </h1>
-                    <p className="mt-4 text-lg text-[#CCCCCC] max-w-xl">
-                        Analyze your text in real-time. Track words, characters, typing speed, and more.
+                    <p className="mt-4 text-lg text-[#CCCCCC] max-w-2xl mx-auto">
+                        <span className="sm:hidden">Analyze your text in real-time. Track words, characters, typing speed, and more.</span>
+                        <span className="hidden sm:inline">Analyze your text in real-time with comprehensive statistics including words, characters, and paragraphs. Track your true typing speed with our intelligent, paste-resistant Words Per Minute (WPM) meter. Securely save your work locally, manage revisions with undo/redo, and access your data anytime, even offline.</span>
                     </p>
                 </header>
                 

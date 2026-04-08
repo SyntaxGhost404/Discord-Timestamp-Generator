@@ -93,7 +93,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 ## 🙏 Acknowledgements
 
--   Created by Moin Uddin in collaboration with Oli Ullah.
+-   Created by [Moin Uddin](https://discord.com/users/794482283993235478) in collaboration with [Oli Ullah](https://x.com/itzsimonsmith?t=tkUyIzJRir_McvmapNWpOA&s=09).
 
 ## 📄 License
 
