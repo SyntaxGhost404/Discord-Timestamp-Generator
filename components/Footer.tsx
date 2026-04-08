@@ -14,24 +14,24 @@ const XIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 export const Footer: React.FC = () => {
     return (
-        <footer className="w-full max-w-2xl mx-auto text-center py-12 mt-8 border-t border-zinc-800">
+        <footer className="w-full max-w-2xl mx-auto text-center py-12 mt-8 border-t border-[#333333]">
             <div className="flex flex-col items-center gap-4">
-                 <p className="text-gray-500 text-sm">
-                    Created by <a href="https://youtu.be/dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="font-medium text-gray-400 hover:text-white transition-colors underline">Moin Uddin</a> in collaboration with <a href="https://x.com/itzsimonsmith?t=tkUyIzJRir_McvmapNWpOA&s=09" target="_blank" rel="noopener noreferrer" className="font-medium text-gray-400 hover:text-white transition-colors underline">Oli Ullah</a>. Heavily inspired by the excellent timestamp generator at <a href="https://timestamp.dabric.xyz" target="_blank" rel="noopener noreferrer" className="font-medium text-gray-400 hover:text-white transition-colors underline">dabric.xyz</a>.
+                 <p className="text-[#999999] text-sm">
+                    Created by <a href="https://youtu.be/dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" className="font-medium text-[#AAAAAA] hover:text-[#CCCCCC] transition-colors underline">Moin Uddin</a> in collaboration with <a href="https://x.com/itzsimonsmith?t=tkUyIzJRir_McvmapNWpOA&s=09" target="_blank" rel="noopener noreferrer" className="font-medium text-[#AAAAAA] hover:text-[#CCCCCC] transition-colors underline">Oli Ullah</a>.
                  </p>
-                 <p className="text-gray-500 text-sm">
+                 <p className="text-[#999999] text-sm">
                     Suggestions, comments, or questions? Reach out on social media.
                  </p>
                  <div className="flex items-center gap-4">
-                    <a href="https://discord.com/users/794482283993235478" target="_blank" rel="noopener noreferrer" aria-label="Discord Profile" className="text-gray-500 hover:text-white transition-colors">
+                    <a href="https://discord.com/users/794482283993235478" target="_blank" rel="noopener noreferrer" aria-label="Discord Profile" className="text-[#999999] hover:text-[#CCCCCC] transition-colors">
                         <DiscordIcon className="h-6 w-6" />
                     </a>
-                     <a href="https://x.com/MOINUDDIN8003?t=j7v3xugr20a8tq0P0qu7gA&s=09" target="_blank" rel="noopener noreferrer" aria-label="X/Twitter Profile" className="text-gray-500 hover:text-white transition-colors">
+                     <a href="https://x.com/MOINUDDIN8003?t=j7v3xugr20a8tq0P0qu7gA&s=09" target="_blank" rel="noopener noreferrer" aria-label="X/Twitter Profile" className="text-[#999999] hover:text-[#CCCCCC] transition-colors">
                         <XIcon className="h-5 w-5" />
                     </a>
                  </div>
-                 <p className="text-xs text-gray-600 mt-4">
-                    Not affiliated with Discord Inc. © 2025
+                 <p className="text-xs text-[#666666] mt-4">
+                    Released under the MIT License. © 2025
                  </p>
             </div>
         </footer>

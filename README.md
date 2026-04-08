@@ -1,64 +1,43 @@
-# Discord Timestamp Generator
+# Word Counter Tool
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=for-the-badge&logo=vercel)](https://discord-timestamp-gen.pages.dev/)
-
-A sophisticated, visually stunning Discord Timestamp Generator that operates in real-time. Create, convert, and reverse any Discord time format using natural language, a manual date picker, or a timezone converter. This is the ultimate utility for all your Discord timestamp needs.
-
-![Discord Timestamp Generator Banner](https://i.ibb.co/bF9gV2x/discord-timestamp-generator-banner.png)
+A powerful, real-time Word Counter Tool designed for writers, students, and professionals. Get instant analysis of your text, including word count, character count, sentences, paragraphs, and a manipulation-proof Words Per Minute (WPM) meter. Save your work locally, manage your revision history with undo/redo, and access your data anytime, even offline.
 
 ## ✨ Features
 
-This tool is designed to be the ultimate utility for all your Discord timestamp needs, packed with features to make the process as intuitive and efficient as possible.
+This tool is designed to be the ultimate utility for text analysis, packed with features to make the process as intuitive and efficient as possible.
 
--   **Natural Language Processing**: Simply type dates and times like `"tomorrow at 4pm"`, `"next Friday"`, or `"in 3 hours"` and get instant results for all **Discord time formats**. Powered by `chrono-node`.
--   **Manual Date & Time Picker**: Use a beautiful and intuitive calendar and time inputs to select a precise moment.
--   **Timezone Converter**: Easily convert a date and time from one timezone to another, perfect for scheduling international events and eliminating confusion when coordinating across different time zones.
--   **Reverse Generator**: Paste an existing Discord timestamp code (e.g., `<t:1672531200:F>`) to **decode the timestamp** and see the human-readable date and time.
--   **Instant Previews**: See how each timestamp format will look inside Discord before you even copy it.
--   **Keyboard Navigation**: Fully accessible via keyboard. Use arrow keys to navigate suggestions and `Enter` to copy.
--   **One-Click Copy**: Copy any generated timestamp code to your clipboard with a single click.
--   **Sleek, Modern UI**: A responsive and aesthetically pleasing interface built with Tailwind CSS and Framer Motion.
--   **Informative FAQ**: An integrated FAQ section explains why and how to use Discord timestamps for each mode.
+-   **Real-Time Analysis**: Instantly see statistics update as you type.
+-   **Comprehensive Statistics**: Track words, characters, sentences, and paragraphs with precision.
+-   **Advanced WPM Meter**: A smart typing speed calculator that intelligently ignores pasted text to provide a true measure of your typing skill.
+-   **Robust History Management**: Browser-style **Undo** and **Redo** functionality. Your session history is continuously cached in the background (via IndexedDB) every 0.75 seconds without blocking the main UI thread.
+-   **Save Your Work**: Store your text entries securely in your browser using IndexedDB (with a LocalStorage fallback) for offline access.
+-   **Manage Saved Entries**: Easily browse, copy, or delete your saved work with a clean, paginated interface.
+-   **Load Entries**: Seamlessly load a saved entry back into the editor for further modification. Includes a confirmation modal to prevent accidental overwriting of your current work.
+-   **Text Utilities**: Quickly clear the editor, or convert your entire text to UPPERCASE or lowercase with a single click.
+-   **Modern Dark Theme**: A sleek, modern dark mode aesthetic designed to reduce eye strain during long writing sessions, featuring a subtle grid pattern and pixelated typography accents.
+-   **Responsive UI**: A beautiful, intuitive interface built with Tailwind CSS and Framer Motion that looks great on any device, featuring a responsive two-row action toolbar.
+-   **Offline Functionality**: Works seamlessly without an internet connection thanks to local data storage.
 
 ## 🚀 How to Use
 
-The generator has four distinct modes to cover every use case.
+The application is split into two main sections for ease of use.
 
-### 1. Natural Mode
+### 1. Counter Tab
 
-This is the default and fastest mode.
-1.  Start typing any date, time, or duration in the input box.
-2.  As you type, a list of timestamp formats will appear with live previews.
-3.  Click on any suggestion or use your arrow keys and `Enter` to copy the timestamp code.
+This is the main workspace for text analysis.
+1.  Start typing or paste text into the main text area.
+2.  Watch the statistics for words, characters, sentences, and paragraphs update in real-time below.
+3.  Your WPM score will be calculated based on your manual typing speed.
+4.  Use the `Clear`, `UPPERCASE`, `lowercase`, `Undo`, `Redo`, and `Save` buttons to manage your content.
 
-**Examples:**
--   `July 1st`
--   `now`
--   `1pm cst`
--   `in 2 hours`
--   `next Tuesday`
+### 2. Saved Entries Tab
 
-### 2. Manual Mode
-
-For when you need precision.
-1.  Select a date from the interactive calendar. You can navigate through months and years.
-2.  Adjust the hour, minute, and second using the time input fields.
-3.  Click "Set to Current Time" to quickly reset to the present moment.
-4.  The generated timestamps will update in real-time below the controls.
-
-### 3. Timezone Mode
-
-Eliminate timezone confusion.
-1.  Use the calendar and time inputs to set a source date and time.
-2.  Select the "From" timezone and the "To" timezone. The tool will auto-detect your local timezone as a starting point.
-3.  The converted time and corresponding timestamps will be generated automatically.
-
-### 4. Reverse Mode
-
-Decode existing timestamps.
-1.  Copy a timestamp from a Discord message (e.g., `<t:1672531200:F>`).
-2.  Paste it into the input box.
-3.  The generator will instantly **decode the Discord timestamp** and display the corresponding date and time in your local timezone, UTC, and relative format.
+View and manage your saved work here.
+1.  Click the "Saved Entries" toggle to view your stored texts.
+2.  Use the "Previous" and "Next" buttons to navigate through pages if you have many entries.
+3.  Click the **copy icon** to copy an entry's content to your clipboard.
+4.  Click the **load icon** to bring an entry back into the Counter tab for editing.
+5.  Click the **trash icon** to permanently delete an entry (you will be asked to confirm).
 
 ## 💻 Tech Stack
 
@@ -66,8 +45,7 @@ Decode existing timestamps.
 -   **Language**: [TypeScript](https://www.typescriptlang.org/)
 -   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 -   **Animations**: [Framer Motion](https://www.framer.com/motion/)
--   **Date Parsing**: [Chrono-node](https://github.com/wanasit/chrono)
--   **Date Formatting**: [Moment.js](https://momentjs.com/)
+-   **Database**: [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) with a LocalStorage fallback.
 -   **Icons**: [Lucide React](https://lucide.dev/)
 
 ## 🛠️ Running Locally
@@ -95,7 +73,7 @@ To get a local copy up and running, follow these simple steps.
     ```
 4.  Start the development server.
     ```sh
-    npm start
+    npm run dev
     ```
 The application should now be running locally, typically at `http://localhost:3000`.
 
@@ -115,8 +93,6 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 ## 🙏 Acknowledgements
 
--   Heavily inspired by the excellent timestamp generator at [dabric.xyz](https://timestamp.dabric.xyz).
--   Timezone conversion powered by the [timeapi.io](https://timeapi.io/) API.
 -   Created by Moin Uddin in collaboration with Oli Ullah.
 
 ## 📄 License
