@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { FileText, Type, Gauge, Save, Pilcrow, Copy, Check, CaseUpper, CaseLower, Trash2, X, CheckCircle2, ArrowUpRight, Undo2, Redo2 } from 'lucide-react';
+import { FileText, Type, Gauge, Save, Pilcrow, Copy, Check, CaseUpper, CaseLower, Trash2, X, CheckCircle2, ArrowUpRight, Undo2, Redo2, HelpCircle, ChevronDown, Smartphone, Zap } from 'lucide-react';
 import { Footer } from './components/Footer';
 import { SavedEntry } from './types';
 
@@ -104,15 +104,20 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: number |
     </div>
 );
 
-const TabToggle: React.FC<{ activeTab: string; onTabChange: (tab: 'counter' | 'saved') => void; }> = ({ activeTab, onTabChange }) => {
-    const tabs = [{ id: 'counter', label: 'Counter' }, { id: 'saved', label: 'Saved Entries' }];
+const TabToggle: React.FC<{ activeTab: string; onTabChange: (tab: 'counter' | 'saved' | 'help') => void; }> = ({ activeTab, onTabChange }) => {
+    const tabs = [
+        { id: 'counter', label: 'Counter' },
+        { id: 'saved', label: 'Saved Entries' },
+        { id: 'help', label: <HelpCircle size={18} />, isIcon: true }
+    ];
     return (
         <div className="flex p-1 bg-[#1A1A1A] rounded-full border border-[#444444]">
             {tabs.map((tab) => (
                 <button
                     key={tab.id}
-                    onClick={() => onTabChange(tab.id as 'counter' | 'saved')}
-                    className="relative px-4 sm:px-6 py-2 text-sm sm:text-base font-medium rounded-full transition-colors focus:outline-none"
+                    onClick={() => onTabChange(tab.id as 'counter' | 'saved' | 'help')}
+                    className={`relative px-4 sm:px-6 py-2 text-sm sm:text-base font-medium rounded-full transition-colors focus:outline-none flex items-center justify-center ${tab.isIcon ? 'px-3 sm:px-4' : ''}`}
+                    aria-label={tab.id === 'help' ? 'Help & FAQ' : undefined}
                 >
                     {activeTab === tab.id && (
                         <motion.div
@@ -122,7 +127,7 @@ const TabToggle: React.FC<{ activeTab: string; onTabChange: (tab: 'counter' | 's
                             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                         />
                     )}
-                    <span className={`relative z-10 transition-colors ${activeTab === tab.id ? 'text-white' : 'text-[#999999] hover:text-[#BBBBBB]'}`}>{tab.label}</span>
+                    <span className={`relative z-10 transition-colors flex items-center justify-center ${activeTab === tab.id ? 'text-white' : 'text-[#999999] hover:text-[#BBBBBB]'}`}>{tab.label}</span>
                 </button>
             ))}
         </div>
@@ -280,7 +285,8 @@ const LoadModal: React.FC<{
 
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => {
-    const [activeTab, setActiveTab] = useState<'counter' | 'saved'>('counter');
+    const [activeTab, setActiveTab] = useState<'counter' | 'saved' | 'help'>('counter');
+    const [openFaq, setOpenFaq] = useState<number | null>(null);
     const [text, setText] = useState('');
     const [wpm, setWpm] = useState(0);
     const [savedEntries, setSavedEntries] = useState<SavedEntry[]>([]);
@@ -749,6 +755,102 @@ const App: React.FC = () => {
         </motion.div>
     );
 
+    const faqs = [
+        { question: "Can I edit a saved entry?", answer: "Yes! Go to the 'Saved Entries' tab and click the load icon (arrow) on any card. This will load the text back into the editor. A confirmation modal will appear if you already have text in the editor to prevent accidental overwrites." },
+        { question: "What happens if I clear my browser cache?", answer: "Since all saved entries and revision history are stored in your browser's IndexedDB and LocalStorage, clearing your site data or cache will permanently delete your saved texts." },
+        { question: "Is there a character limit for the text editor?", answer: "There is no hardcoded character limit. However, extremely large documents (e.g., hundreds of pages) might cause browser sluggishness due to real-time DOM updates and caching." },
+        { question: "Why is the 'Save' button disabled?", answer: "The 'Save' button automatically disables when the text editor is completely empty to prevent saving blank entries to your database." },
+        { question: "How is the 'Paragraphs' metric calculated?", answer: "A paragraph is counted whenever there is a double line break (pressing Enter twice). Single line breaks are treated as continuous text within the same paragraph." },
+        { question: "Does the tool work completely offline?", answer: "Yes! Once the website is loaded, all scripts, logic, and storage mechanisms run entirely locally on your device without requiring an active internet connection." }
+    ];
+
+    const helpView = (
+        <motion.div key="help" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full flex flex-col gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2">
+                <div className="bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><FileText size={18} className="text-white" /></div>
+                        <h3 className="font-semibold text-white">Real-time Statistics</h3>
+                    </div>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Instantly track words, characters, sentences, and paragraphs as you type.</p>
+                </div>
+                <div className="bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Gauge size={18} className="text-white" /></div>
+                        <h3 className="font-semibold text-white">Intelligent WPM</h3>
+                    </div>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Accurately measure your typing speed. Our meter ignores pasted text for true WPM.</p>
+                </div>
+                <div className="bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Save size={18} className="text-white" /></div>
+                        <h3 className="font-semibold text-white">Local Storage</h3>
+                    </div>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Securely save your entries directly in your browser. No servers, complete privacy.</p>
+                </div>
+                <div className="bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Undo2 size={18} className="text-white" /></div>
+                        <h3 className="font-semibold text-white">Revision History</h3>
+                    </div>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Make mistakes without fear. Use undo and redo to navigate your recent edits.</p>
+                </div>
+                <div className="hidden sm:block bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Smartphone size={18} className="text-white" /></div>
+                        <h3 className="font-semibold text-white">Responsive Design</h3>
+                    </div>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Optimized for all devices. Work seamlessly across your desktop, tablet, and mobile phone.</p>
+                </div>
+                <div className="hidden sm:block bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
+                    <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Zap size={18} className="text-white" /></div>
+                        <h3 className="font-semibold text-white">Quick Actions</h3>
+                    </div>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Format text instantly with one-click uppercase, lowercase, and clear actions.</p>
+                </div>
+            </div>
+
+            <div className="bg-[#1A1A1A] p-6 rounded-xl border border-[#333333]">
+                <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <HelpCircle className="text-[#999999]" /> Frequently Asked Questions
+                </h2>
+                <div className="flex flex-col gap-3">
+                    {faqs.map((faq, index) => (
+                        <div key={index} className="border border-[#333333] rounded-lg overflow-hidden bg-[#222222]">
+                            <button
+                                onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                                className="w-full flex justify-between items-center p-4 text-left hover:bg-[#2A2A2A] transition-colors focus:outline-none"
+                            >
+                                <span className="font-medium text-[#EEEEEE]">{faq.question}</span>
+                                <motion.div
+                                    animate={{ rotate: openFaq === index ? 180 : 0 }}
+                                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                                >
+                                    <ChevronDown size={18} className="text-[#999999]" />
+                                </motion.div>
+                            </button>
+                            <AnimatePresence initial={false}>
+                                {openFaq === index && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                                    >
+                                        <div className="p-4 text-[#AAAAAA] text-sm leading-relaxed border-t border-[#333333]">
+                                            {faq.answer}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </motion.div>
+    );
+
     return (
         <div className="min-h-screen w-full flex flex-col items-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
             <ConfirmationModal 
@@ -773,10 +875,6 @@ const App: React.FC = () => {
                     <h1 className="text-3xl sm:text-5xl font-bold text-white tracking-tight font-pixel">
                         Word Counter<span className="hidden sm:inline"> Tool</span>
                     </h1>
-                    <p className="mt-4 text-lg text-[#CCCCCC] max-w-2xl mx-auto">
-                        <span className="sm:hidden">Analyze your text in real-time. Track words, characters, typing speed, and more.</span>
-                        <span className="hidden sm:inline">Analyze your text in real-time with comprehensive statistics including words, characters, and paragraphs. Track your true typing speed with our intelligent, paste-resistant Words Per Minute (WPM) meter. Securely save your work locally, manage revisions with undo/redo, and access your data anytime, even offline.</span>
-                    </p>
                 </header>
                 
                 <div ref={topOfListRef}>
@@ -786,7 +884,7 @@ const App: React.FC = () => {
                 </div>
 
                 <AnimatePresence mode="wait">
-                    {activeTab === 'counter' ? counterView : savedEntriesView}
+                    {activeTab === 'counter' ? counterView : activeTab === 'saved' ? savedEntriesView : helpView}
                 </AnimatePresence>
             </main>
             <Footer />
