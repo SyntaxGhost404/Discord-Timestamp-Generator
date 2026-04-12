@@ -21,21 +21,29 @@ export default defineConfig(({ mode }) => {
           },
           manifest: {
             name: 'Word Counter Tool',
-            short_name: 'WordCounter',
+            short_name: 'Word Counter Tool',
             description: 'Analyze your text in real-time with comprehensive statistics.',
             theme_color: '#1A1A1A',
             background_color: '#1A1A1A',
             display: 'standalone',
             icons: [
               {
+                src: '/favicon.svg',
+                sizes: 'any',
+                type: 'image/svg+xml',
+                purpose: 'any'
+              },
+              {
                 src: '/logo.png',
                 sizes: '192x192',
-                type: 'image/png'
+                type: 'image/png',
+                purpose: 'any'
               },
               {
                 src: '/logo.png',
                 sizes: '512x512',
-                type: 'image/png'
+                type: 'image/png',
+                purpose: 'any maskable'
               }
             ]
           }
