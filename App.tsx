@@ -760,7 +760,7 @@ const App: React.FC = () => {
         { question: "What happens if I clear my browser cache?", answer: "Since all saved entries and revision history are stored in your browser's IndexedDB and LocalStorage, clearing your site data or cache will permanently delete your saved texts." },
         { question: "Is there a character limit for the text editor?", answer: "There is no hardcoded character limit. However, extremely large documents (e.g., hundreds of pages) might cause browser sluggishness due to real-time DOM updates and caching." },
         { question: "Why is the 'Save' button disabled?", answer: "The 'Save' button automatically disables when the text editor is completely empty to prevent saving blank entries to your database." },
-        { question: "How is the 'Paragraphs' metric calculated?", answer: "A paragraph is counted whenever there is a double line break (pressing Enter twice). Single line breaks are treated as continuous text within the same paragraph." },
+        { question: "Can I install this tool as an app on my device?", answer: "Yes! This tool is a Progressive Web App (PWA). You can install it directly to your home screen or desktop for quick access. Look for the 'Install' icon in your browser's address bar or the 'Add to Home Screen' option in your mobile browser menu." },
         { question: "Does the tool work completely offline?", answer: "Yes! Once the website is loaded, all scripts, logic, and storage mechanisms run entirely locally on your device without requiring an active internet connection." }
     ];
 
