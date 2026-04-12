@@ -119,13 +119,13 @@ const countParagraphs = (text: string) => text.trim() ? text.split(/\n\s*\n/).fi
 
 // --- UI COMPONENTS (Defined within App for simplicity) ---
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: number | string }> = ({ icon, label, value }) => (
-    <div className="bg-[#1A1A1A] p-4 rounded-xl flex items-center gap-4 border border-[#333333]">
+    <motion.div layout className="bg-[#1A1A1A] p-4 rounded-xl flex items-center gap-4 border border-[#333333]">
         <div className="text-2xl">{icon}</div>
-        <div>
+        <motion.div layout="position">
             <p className="text-xs font-medium text-[#999999] uppercase">{label}</p>
             <p className="text-2xl font-bold text-white">{value}</p>
-        </div>
-    </div>
+        </motion.div>
+    </motion.div>
 );
 
 const TabToggle: React.FC<{ activeTab: string; onTabChange: (tab: 'counter' | 'saved' | 'help') => void; }> = ({ activeTab, onTabChange }) => {
@@ -705,6 +705,20 @@ const App: React.FC = () => {
         setActiveTab('counter');
     };
 
+    const maxDigits = Math.max(
+        stats.words.toString().length,
+        stats.characters.toString().length,
+        stats.sentences.toString().length,
+        stats.paragraphs.toString().length
+    );
+
+    let gridClass = "grid-cols-2 md:grid-cols-4";
+    if (maxDigits > 9) {
+        gridClass = "grid-cols-1 md:grid-cols-1";
+    } else if (maxDigits > 5) {
+        gridClass = "grid-cols-1 md:grid-cols-2";
+    }
+
     const loadedEntry = savedEntries.find(e => e.id === loadedEntryId);
 
     const counterView = (
@@ -781,12 +795,12 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <motion.div layout className={`grid gap-4 ${gridClass}`}>
                 <StatCard icon={<FileText className="text-[#CCCCCC]" />} label="Words" value={stats.words} />
                 <StatCard icon={<Type className="text-[#CCCCCC]" />} label="Characters" value={stats.characters} />
                 <StatCard icon={<span className="text-[#CCCCCC] font-bold">Σ</span>} label="Sentences" value={stats.sentences} />
                 <StatCard icon={<Pilcrow className="text-[#CCCCCC]" />} label="Paragraphs" value={stats.paragraphs} />
-            </div>
+            </motion.div>
 
             <div className="bg-[#1A1A1A] p-4 rounded-xl border border-[#333333]">
                 <div className="flex justify-between items-center mb-2">
