@@ -86,9 +86,33 @@ const storage = {
             }
         }
     },
+    async updateEntry(entry: SavedEntry): Promise<void> {
+        if (isIDBAvailable) {
+            const db = await initDB();
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).put(entry);
+            await new Promise(resolve => tx.oncomplete = resolve);
+        } else {
+            const entries = await this.getEntries();
+            const newEntries = entries.map(e => e.id === entry.id ? entry : e);
+            localStorage.setItem(STORE_NAME, JSON.stringify(newEntries));
+        }
+    },
 };
 
 // --- HELPER FUNCTIONS ---
+const useBodyScrollLock = (isLocked: boolean) => {
+    useEffect(() => {
+        if (isLocked) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isLocked]);
+};
 const countWords = (text: string) => text.trim() ? text.trim().split(/\s+/).length : 0;
 const countSentences = (text: string) => text.trim() ? (text.match(/[.!?]+(?:\s|$)/g) || []).length : 0;
 const countParagraphs = (text: string) => text.trim() ? text.split(/\n\s*\n/).filter(Boolean).length : 0;
@@ -139,6 +163,7 @@ const ConfirmationModal: React.FC<{
     onClose: () => void;
     onConfirm: () => void;
 }> = ({ isOpen, onClose, onConfirm }) => {
+    useBodyScrollLock(isOpen);
     return (
         <AnimatePresence>
             {isOpen && (
@@ -191,6 +216,7 @@ const SuccessModal: React.FC<{
     title: string;
     message: string;
 }> = ({ isOpen, onClose, title, message }) => {
+    useBodyScrollLock(isOpen);
     return (
         <AnimatePresence>
             {isOpen && (
@@ -237,6 +263,7 @@ const LoadModal: React.FC<{
     onClose: () => void;
     onConfirm: () => void;
 }> = ({ isOpen, onClose, onConfirm }) => {
+    useBodyScrollLock(isOpen);
     return (
         <AnimatePresence>
             {isOpen && (
@@ -283,6 +310,59 @@ const LoadModal: React.FC<{
     );
 };
 
+const SaveConfirmationModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onSaveOriginal: () => void;
+    onSaveNew: () => void;
+}> = ({ isOpen, onClose, onSaveOriginal, onSaveNew }) => {
+    useBodyScrollLock(isOpen);
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                    onClick={onClose}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        className="relative bg-[#1A1A1A] w-full max-w-md m-4 p-6 rounded-2xl border border-[#333333] shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                         <button onClick={onClose} className="absolute top-4 right-4 p-1 rounded-full text-[#999999] hover:bg-[#222222] transition-colors" aria-label="Close modal">
+                            <X size={20} />
+                        </button>
+                        <h2 className="text-2xl font-bold text-white">Save Entry</h2>
+                        <p className="mt-3 text-[#CCCCCC]">
+                            You are editing a previously saved entry. Would you like to overwrite the original entry or save this as a new copy?
+                        </p>
+                        <div className="mt-6 flex justify-end gap-4">
+                            <button
+                                onClick={onSaveNew}
+                                className="px-5 py-2.5 rounded-lg bg-[#222222] border border-[#444444] text-[#CCCCCC] font-medium hover:bg-[#333333] transition-colors focus:outline-none"
+                            >
+                                Save as New
+                            </button>
+                            <button
+                                onClick={onSaveOriginal}
+                                className="px-5 py-2.5 rounded-lg bg-blue-900/50 border border-blue-800 text-blue-200 font-medium hover:bg-blue-900/80 transition-colors focus:outline-none"
+                            >
+                                Save to Original
+                            </button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+};
+
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'counter' | 'saved' | 'help'>('counter');
@@ -296,8 +376,10 @@ const App: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
     const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
-    const [entryToLoad, setEntryToLoad] = useState<string | null>(null);
+    const [entryToLoad, setEntryToLoad] = useState<SavedEntry | null>(null);
+    const [loadedEntryId, setLoadedEntryId] = useState<number | null>(null);
     const ENTRIES_PER_PAGE = 5;
 
     const [history, setHistory] = useState<string[]>(['']);
@@ -521,6 +603,14 @@ const App: React.FC = () => {
 
     const handleSave = async () => {
         if (!text.trim()) return;
+        if (loadedEntryId !== null) {
+            setIsSaveModalOpen(true);
+        } else {
+            await saveAsNew();
+        }
+    };
+
+    const saveAsNew = async () => {
         const newEntry = {
             content: text,
             wordCount: stats.words,
@@ -528,9 +618,29 @@ const App: React.FC = () => {
         };
         await storage.saveEntry(newEntry);
         setText('');
+        setLoadedEntryId(null);
         pastedCharsCountRef.current = 0;
         typingHistoryRef.current = [];
         setWpm(0);
+        setIsSaveModalOpen(false);
+        setIsSuccessModalOpen(true);
+    };
+
+    const saveToOriginal = async () => {
+        if (loadedEntryId === null) return;
+        const updatedEntry = {
+            id: loadedEntryId,
+            content: text,
+            wordCount: stats.words,
+            savedAt: Date.now(),
+        };
+        await storage.updateEntry(updatedEntry);
+        setText('');
+        setLoadedEntryId(null);
+        pastedCharsCountRef.current = 0;
+        typingHistoryRef.current = [];
+        setWpm(0);
+        setIsSaveModalOpen(false);
         setIsSuccessModalOpen(true);
     };
     
@@ -562,12 +672,12 @@ const App: React.FC = () => {
         setEntryToDelete(null);
     };
 
-    const handleLoad = (content: string) => {
+    const handleLoad = (entry: SavedEntry) => {
         if (text.trim().length > 0) {
-            setEntryToLoad(content);
+            setEntryToLoad(entry);
             setIsLoadModalOpen(true);
         } else {
-            executeLoad(content);
+            executeLoad(entry);
         }
     };
 
@@ -579,32 +689,70 @@ const App: React.FC = () => {
         setEntryToLoad(null);
     };
 
-    const executeLoad = (content: string) => {
-        setText(content);
-        pastedCharsCountRef.current = content.length; // Treat loaded text as pasted so it doesn't count towards WPM
+    const executeLoad = (entry: SavedEntry) => {
+        setText(entry.content);
+        setLoadedEntryId(entry.id);
+        pastedCharsCountRef.current = entry.content.length; // Treat loaded text as pasted so it doesn't count towards WPM
         typingHistoryRef.current = [];
         setWpm(0);
         
         // Reset history stack
-        setHistory(['', content]);
+        setHistory(['', entry.content]);
         setHistoryIndex(1);
         historyIndexRef.current = 1;
-        lastSavedTextRef.current = content;
+        lastSavedTextRef.current = entry.content;
 
         setActiveTab('counter');
     };
 
+    const loadedEntry = savedEntries.find(e => e.id === loadedEntryId);
+
     const counterView = (
         <motion.div key="counter" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full flex flex-col gap-5">
-            <textarea
-                value={text}
-                onChange={handleTextChange}
-                onPaste={handlePasteOrDrop}
-                onDrop={handlePasteOrDrop}
-                placeholder="Start typing here to see the magic happen..."
-                className="w-full h-64 p-4 bg-[#222222] border border-[#444444] rounded-xl text-lg text-[#CCCCCC] placeholder-[#888888] focus:outline-none focus:ring-1 focus:ring-[#666666] transition-all duration-300 resize-none shadow-inner"
-                aria-label="Text input area"
-            />
+            <div className="w-full flex flex-col">
+                <AnimatePresence>
+                    {loadedEntryId && loadedEntry && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="w-full overflow-hidden"
+                        >
+                            <div className="bg-[#1A1A1A] p-3 sm:p-4 rounded-xl border border-[#333333] flex items-center justify-between">
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <div className="p-2 bg-[#222222] rounded-lg border border-[#444444] hidden sm:block">
+                                        <FileText size={18} className="text-[#CCCCCC]" />
+                                    </div>
+                                    <div className="flex flex-col truncate">
+                                        <span className="text-xs font-semibold text-[#AAAAAA] uppercase tracking-wider mb-0.5">Active Editing</span>
+                                        <span className="text-sm text-[#CCCCCC] truncate">
+                                            Saved on {new Date(loadedEntry.savedAt).toLocaleDateString()} at {new Date(loadedEntry.savedAt).toLocaleTimeString()}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setLoadedEntryId(null)}
+                                    className="p-2 rounded-lg hover:bg-[#222222] transition-colors text-[#999999] hover:text-[#CCCCCC] flex-shrink-0"
+                                    aria-label="Break editorial link"
+                                >
+                                    <X size={16} className="sm:w-5 sm:h-5 flex-shrink-0" />
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <textarea
+                    value={text}
+                    onChange={handleTextChange}
+                    onPaste={handlePasteOrDrop}
+                    onDrop={handlePasteOrDrop}
+                    placeholder="Start typing here to see the magic happen..."
+                    className="w-full h-64 p-4 bg-[#222222] border border-[#444444] rounded-xl text-lg text-[#CCCCCC] placeholder-[#888888] focus:outline-none focus:ring-1 focus:ring-[#666666] transition-all duration-300 resize-none shadow-inner"
+                    aria-label="Text input area"
+                />
+            </div>
 
             <div className="flex flex-col gap-3 w-full">
                 {/* Row 1 */}
@@ -709,7 +857,7 @@ const App: React.FC = () => {
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => handleLoad(entry.content)} className="p-2 rounded-full hover:bg-[#222222] transition-colors border border-transparent hover:border-[#444444]" aria-label="Load text into counter">
+                                            <button onClick={() => handleLoad(entry)} className="p-2 rounded-full hover:bg-[#222222] transition-colors border border-transparent hover:border-[#444444]" aria-label="Load text into counter">
                                                 <ArrowUpRight size={18} className="text-[#999999] hover:text-[#CCCCCC]" />
                                             </button>
                                             <button onClick={() => handleCopy(entry.id, entry.content)} className="p-2 rounded-full hover:bg-[#222222] transition-colors border border-transparent hover:border-[#444444]" aria-label="Copy text">
@@ -756,12 +904,12 @@ const App: React.FC = () => {
     );
 
     const faqs = [
-        { question: "Can I edit a saved entry?", answer: "Yes! Go to the 'Saved Entries' tab and click the load icon (arrow) on any card. This will load the text back into the editor. A confirmation modal will appear if you already have text in the editor to prevent accidental overwrites." },
-        { question: "What happens if I clear my browser cache?", answer: "Since all saved entries and revision history are stored in your browser's IndexedDB and LocalStorage, clearing your site data or cache will permanently delete your saved texts." },
-        { question: "Is there a character limit for the text editor?", answer: "There is no hardcoded character limit. However, extremely large documents (e.g., hundreds of pages) might cause browser sluggishness due to real-time DOM updates and caching." },
-        { question: "Why is the 'Save' button disabled?", answer: "The 'Save' button automatically disables when the text editor is completely empty to prevent saving blank entries to your database." },
-        { question: "Can I install this tool as an app on my device?", answer: "Yes! This tool is a Progressive Web App (PWA). You can install it directly to your home screen or desktop for quick access. Look for the 'Install' icon in your browser's address bar or the 'Add to Home Screen' option in your mobile browser menu." },
-        { question: "Does the tool work completely offline?", answer: "Yes! Once the website is loaded, all scripts, logic, and storage mechanisms run entirely locally on your device without requiring an active internet connection." }
+        { question: "How do I overwrite a previously saved entry?", answer: "Go to the 'Saved Entries' tab and load an entry. An 'Active Editing' banner will appear above the editor. When you click 'Save', you will be prompted to either overwrite the original entry or save your edits as a brand new copy." },
+        { question: "What does the 'X' on the Active Editing banner do?", answer: "Clicking the 'X' breaks the connection to the original file, but it does not delete your text. If you click 'Save' afterward, it will automatically save as a new entry instead of asking to overwrite." },
+        { question: "What happens if I click 'Clear' while editing?", answer: "The 'Clear' button only empties the text box so you can start fresh. It does not delete your saved file or break the 'Active Editing' connection, allowing you to completely rewrite an entry before overwriting it." },
+        { question: "How do I install this tool on my device?", answer: "Look for the 'Install' icon in your browser's address bar (on desktop) or select 'Add to Home Screen' from your mobile browser's menu to install it as a standalone app." },
+        { question: "What happens if I clear my browser cache?", answer: "Since all saved entries and revision history are stored locally in your browser's database, clearing your site data or cache will permanently delete your saved texts." },
+        { question: "Is there a character limit for the text editor?", answer: "There is no hardcoded character limit. However, extremely large documents (e.g., hundreds of pages) might cause browser sluggishness due to real-time DOM updates." }
     ];
 
     const helpView = (
@@ -784,9 +932,9 @@ const App: React.FC = () => {
                 <div className="bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Save size={18} className="text-white" /></div>
-                        <h3 className="font-semibold text-white">Local Storage</h3>
+                        <h3 className="font-semibold text-white">Advanced Editing</h3>
                     </div>
-                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Securely save your entries directly in your browser. No servers, complete privacy.</p>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Load past entries, track your active editing session, and choose to overwrite or save as new.</p>
                 </div>
                 <div className="bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
                     <div className="flex items-center gap-3 mb-3">
@@ -798,9 +946,9 @@ const App: React.FC = () => {
                 <div className="hidden sm:block bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
                     <div className="flex items-center gap-3 mb-3">
                         <div className="p-2 bg-[#222222] rounded-lg border border-[#444444]"><Smartphone size={18} className="text-white" /></div>
-                        <h3 className="font-semibold text-white">Responsive Design</h3>
+                        <h3 className="font-semibold text-white">Offline & Installable</h3>
                     </div>
-                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Optimized for all devices. Work seamlessly across your desktop, tablet, and mobile phone.</p>
+                    <p className="text-sm text-[#AAAAAA] leading-relaxed">Works completely offline. Install it as a Progressive Web App (PWA) on your desktop or mobile device.</p>
                 </div>
                 <div className="hidden sm:block bg-[#1A1A1A] p-5 rounded-xl border border-[#333333]">
                     <div className="flex items-center gap-3 mb-3">
@@ -863,11 +1011,17 @@ const App: React.FC = () => {
                 onClose={() => setIsLoadModalOpen(false)}
                 onConfirm={handleConfirmLoad}
             />
-             <SuccessModal 
+            <SuccessModal 
                 isOpen={isSuccessModalOpen}
                 onClose={() => setIsSuccessModalOpen(false)}
                 title="Success!"
                 message="Your text has been saved successfully."
+            />
+            <SaveConfirmationModal
+                isOpen={isSaveModalOpen}
+                onClose={() => setIsSaveModalOpen(false)}
+                onSaveOriginal={saveToOriginal}
+                onSaveNew={saveAsNew}
             />
 
             <main className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 relative">
