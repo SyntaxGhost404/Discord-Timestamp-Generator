@@ -363,6 +363,91 @@ const SaveConfirmationModal: React.FC<{
     );
 };
 
+const PageJumpModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: (page: number) => void;
+    totalPages: number;
+    currentPage: number;
+}> = ({ isOpen, onClose, onConfirm, totalPages, currentPage }) => {
+    const [inputPage, setInputPage] = useState(currentPage.toString());
+    useBodyScrollLock(isOpen);
+
+    useEffect(() => {
+        if (isOpen) {
+            setInputPage(currentPage.toString());
+        }
+    }, [isOpen, currentPage]);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        const pageNum = parseInt(inputPage, 10);
+        if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+            onConfirm(pageNum);
+        }
+    };
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                    onClick={onClose}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0, y: 30 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.9, opacity: 0, y: 30 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                        className="relative bg-[#1A1A1A] w-full max-w-sm m-4 p-6 rounded-2xl border border-[#333333] shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button onClick={onClose} className="absolute top-4 right-4 p-1 rounded-full text-[#999999] hover:bg-[#222222] transition-colors" aria-label="Close modal">
+                            <X size={20} />
+                        </button>
+                        <h2 className="text-xl font-bold text-white mb-4">Jump to Page</h2>
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                            <div>
+                                <label htmlFor="pageInput" className="block text-sm text-[#AAAAAA] mb-2">
+                                    Enter page number (1 - {totalPages}):
+                                </label>
+                                <input
+                                    id="pageInput"
+                                    type="number"
+                                    min={1}
+                                    max={totalPages}
+                                    value={inputPage}
+                                    onChange={(e) => setInputPage(e.target.value)}
+                                    className="w-full p-3 bg-[#222222] border border-[#444444] rounded-lg text-white focus:outline-none focus:border-[#666666] transition-colors"
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="flex justify-end gap-3 mt-2">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-4 py-2 rounded-lg bg-[#222222] border border-[#444444] text-[#CCCCCC] font-medium hover:bg-[#333333] transition-colors focus:outline-none"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 rounded-lg bg-blue-900/50 border border-blue-800 text-blue-200 font-medium hover:bg-blue-900/80 transition-colors focus:outline-none"
+                                >
+                                    Go
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+};
+
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'counter' | 'saved' | 'help'>('counter');
@@ -377,6 +462,7 @@ const App: React.FC = () => {
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
     const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [isPageJumpModalOpen, setIsPageJumpModalOpen] = useState(false);
     const [entryToDelete, setEntryToDelete] = useState<number | null>(null);
     const [entryToLoad, setEntryToLoad] = useState<SavedEntry | null>(null);
     const [loadedEntryId, setLoadedEntryId] = useState<number | null>(null);
@@ -829,6 +915,11 @@ const App: React.FC = () => {
         setPaginationDirection(boundedPage > currentPage ? 1 : -1);
         setCurrentPage(boundedPage);
     };
+
+    const handlePageJump = (page: number) => {
+        handlePageChange(page);
+        setIsPageJumpModalOpen(false);
+    };
     
     const paginationVariants = {
         initial: (direction: number) => ({
@@ -898,9 +989,20 @@ const App: React.FC = () => {
                             >
                                 Previous
                             </button>
-                            <span className="text-sm text-[#999999]">
-                                Page {currentPage} of {totalPages}
-                            </span>
+                            <div className="flex items-center gap-2 text-sm text-[#999999] font-medium">
+                                <span>Page</span>
+                                <motion.button
+                                    onClick={() => setIsPageJumpModalOpen(true)}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="relative group min-w-[2.5rem] h-8 px-2 bg-gradient-to-b from-[#2A2A2A] to-[#222222] border border-[#444444] rounded-lg text-white font-bold flex items-center justify-center shadow-[0_2px_4px_rgba(0,0,0,0.2)] hover:border-[#666666] transition-all focus:outline-none focus:ring-2 focus:ring-[#666666]"
+                                    aria-label={`Current page is ${currentPage}. Click to jump to another page.`}
+                                >
+                                    {currentPage}
+                                    <div className="absolute inset-0 rounded-lg bg-white opacity-0 group-hover:opacity-5 transition-opacity"></div>
+                                </motion.button>
+                                <span>of {totalPages}</span>
+                            </div>
                             <button
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={currentPage === totalPages}
@@ -1036,6 +1138,13 @@ const App: React.FC = () => {
                 onClose={() => setIsSaveModalOpen(false)}
                 onSaveOriginal={saveToOriginal}
                 onSaveNew={saveAsNew}
+            />
+            <PageJumpModal
+                isOpen={isPageJumpModalOpen}
+                onClose={() => setIsPageJumpModalOpen(false)}
+                onConfirm={handlePageJump}
+                totalPages={totalPages}
+                currentPage={currentPage}
             />
 
             <main className="w-full max-w-2xl mx-auto flex flex-col items-center gap-8 relative">
