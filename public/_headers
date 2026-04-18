@@ -1,0 +1,4 @@
+/
+  Link: </.well-known/api-catalog>; rel="api-catalog", </.well-known/agent-skills/index.json>; rel="agent-skills", </docs/api>; rel="service-doc"
+/*
+  Access-Control-Allow-Origin: *

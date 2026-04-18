@@ -1,0 +1,10 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://word-counter-tools.pages.dev/api",
+      "service-desc": [{"href": "https://word-counter-tools.pages.dev/openapi.json", "type": "application/openapi+json"}],
+      "service-doc": [{"href": "https://word-counter-tools.pages.dev/docs", "type": "text/html"}],
+      "status": [{"href": "https://word-counter-tools.pages.dev/api/health", "type": "application/json"}]
+    }
+  ]
+}

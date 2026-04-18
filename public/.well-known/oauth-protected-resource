@@ -1,0 +1,5 @@
+{
+  "resource": "https://word-counter-tools.pages.dev/api",
+  "authorization_servers": ["https://word-counter-tools.pages.dev"],
+  "scopes_supported": ["read", "write"]
+}

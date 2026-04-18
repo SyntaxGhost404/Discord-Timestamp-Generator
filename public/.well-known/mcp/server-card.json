@@ -1,0 +1,13 @@
+{
+  "serverInfo": {
+    "name": "word-counter-app",
+    "version": "1.0.0"
+  },
+  "transport": {
+    "type": "http",
+    "endpoint": "https://word-counter-tools.pages.dev/mcp"
+  },
+  "capabilities": {
+    "tools": true
+  }
+}

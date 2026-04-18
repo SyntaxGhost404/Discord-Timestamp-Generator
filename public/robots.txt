@@ -21,4 +21,4 @@ Allow: /
 # Content Signals
 Content-Signal: ai-train=no, search=yes, ai-input=no
 
-Sitemap: https://ais-dev-oxxjbuc3piubqrhfabq4cd-648855403697.asia-southeast1.run.app/sitemap.xml
+Sitemap: https://word-counter-tools.pages.dev/sitemap.xml
