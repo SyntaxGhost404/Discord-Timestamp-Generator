@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+
+# Explicit AI Rules
+User-agent: GPTBot
+Disallow: /private/
+Allow: /
+
+User-agent: OAI-SearchBot
+Disallow: /private/
+Allow: /
+
+User-agent: Claude-Web
+Disallow: /private/
+Allow: /
+
+User-agent: Google-Extended
+Disallow: /private/
+Allow: /
+
+# Content Signals
+Content-Signal: ai-train=no, search=yes, ai-input=no
+
+Sitemap: https://ais-dev-oxxjbuc3piubqrhfabq4cd-648855403697.asia-southeast1.run.app/sitemap.xml
